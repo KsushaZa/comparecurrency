@@ -1,8 +1,10 @@
 package com.nadershinaka.comparecurrency.config;
 
+import feign.Logger;
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 
 public class GiphyConfig {
@@ -18,6 +20,10 @@ public class GiphyConfig {
             requestTemplate.query("api_key", giphyApiKey);
             requestTemplate.query("rating", giphyRating);
         };
+    }
+    @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
     }
 }
 

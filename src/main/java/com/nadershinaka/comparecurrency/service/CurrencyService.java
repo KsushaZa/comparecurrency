@@ -3,6 +3,7 @@ package com.nadershinaka.comparecurrency.service;
 import com.nadershinaka.comparecurrency.client.GiphyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 
@@ -15,11 +16,13 @@ public class CurrencyService {
 
     @Autowired
     private GiphyClient giphyClient;
+    @Autowired
+    private RestTemplate restTemplate;
 
     private LocalDate lastDelayDate = null;
 
     //Получаем гифку в зависимости от того как изменился курс
-    public String getGifToDifferenceExchangeRate(String quotedCurrency) {
+    public byte[] getGifToDifferenceExchangeRate(String quotedCurrency) {
         //Получаем разницу между курсом заданной валюты за вчерашний и текущий день
         Double todayRate = exchangeRateService.getExchangeRate(quotedCurrency, 0L);
 
@@ -38,7 +41,12 @@ public class CurrencyService {
 
         //Получаем url гифки в зависимости от изменения курса
         String gifType = getGifId(difference);
-        return giphyClient.getGiphy(gifType).getData().get("url").toString();
+        String url = giphyClient.getGiphy(gifType).getData().getImages().getOriginal().getUrl();
+        try {
+            return restTemplate.getForObject(url, byte[].class);
+        } catch (Exception e) {
+            throw new RuntimeException("Не удалось загрузить гифку", e);
+        }
     }
 
     //Получаем id гифки в зависимости от разницы курса
